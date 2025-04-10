@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Плеер: Самообслуживание в гастрономе</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 40px;
+      background-image: url("texture.jpg");
+      background-size: cover;
+      background-repeat: repeat;
+      background-position: center;
+    }
+
+    h1 {
+      font-size: 1.4em;
+      margin-bottom: 30px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <h1>🎧 Самообслуживание в гастрономе</h1>
+  <div id="hebrewWord">Загрузка...</div>
+  <div id="translation"></div>
+  <div id="controls">
+    <button id="repeatBtn" class="control-button">🔁 Повторить</button>
+    <button id="autoBtn" class="control-button">▶ Авто</button>
+    <button id="nextBtn" class="control-button">➡ Продолжить</button>
+    <button id="skipBtn" class="control-button">🗑 Не повторять</button>
+  </div>
+  <div id="progress">Выучено: 0 / 0</div>
+<div id="home-link">
+  <a href="index.html" class="control-button">🏠 На главную</a>
+</div>
+
+  <body class="player">
+
+  <script>
+    let terms = [];
+    let allTerms = [];
+    let audioMap = {};
+    let current = null;
+    let autoMode = false;
+    let autoTimer = null;
+    let index = 0;
+    let prev = null;
+
+    function updateProgress() {
+      const learned = allTerms.length - terms.length;
+      const total = allTerms.length;
+      document.getElementById("progress").innerText = `Выучено: ${learned} / ${total}`;
+    }
+
+    function playAudioAndScheduleNext(hebrew) {
+      const filename = audioMap[hebrew];
+      if (!filename) return;
+
+      const audio = new Audio("audio/" + encodeURIComponent(filename));
+      audio.play();
+
+      audio.addEventListener("loadedmetadata", () => {
+        const pause = (audio.duration * 1000) + 1800;
+        autoTimer = setTimeout(() => {
+          showNextWord();
+        }, pause);
+      });
+    }
+
+    function showNextWord() {
+      if (terms.length === 0) {
+        document.getElementById("hebrewWord").innerText = "🎉 Все слова просмотрены!";
+        document.getElementById("translation").innerText = "";
+        autoMode = false;
+        return;
+      }
+
+      if (autoMode) {
+        let attempts = 0;
+      do {
+        current = terms[Math.floor(Math.random() * terms.length)];
+        attempts++;
+      } while (terms.length > 1 && current === prev && attempts < 10);
+      prev = current;
+      } else {
+        if (index >= terms.length) index = 0;
+        current = terms[index];
+        index++;
+      }
+
+      document.getElementById("hebrewWord").innerText = current[0];
+      document.getElementById("translation").innerText = current[1];
+      updateProgress();
+
+      if (autoMode) {
+        playAudioAndScheduleNext(current[0]);
+      } else {
+        playAudio(current[0]);
+      }
+    }
+
+    function playAudio(hebrew) {
+      const filename = audioMap[hebrew];
+      if (filename) {
+        const audio = new Audio("audio/" + encodeURIComponent(filename));
+        audio.play();
+      }
+    }
+
+    document.getElementById("repeatBtn").onclick = () => {
+      if (current) playAudio(current[0]);
+    };
+
+    document.getElementById("nextBtn").onclick = () => {
+      if (autoMode) clearTimeout(autoTimer);
+      showNextWord();
+    };
+
+    document.getElementById("skipBtn").onclick = () => {
+      terms = terms.filter(t => t !== current);
+      if (!autoMode) index = Math.max(0, index - 1);
+      updateProgress();
+      if (autoMode) clearTimeout(autoTimer);
+      showNextWord();
+    };
+
+    document.getElementById("autoBtn").onclick = () => {
+      autoMode = !autoMode;
+      index = 0; // сбрасываем индекс при переключении
+      const autoBtn = document.getElementById("autoBtn");
+      if (autoMode) {
+        autoBtn.innerText = "⏸ Стоп";
+        showNextWord();
+      } else {
+        autoBtn.innerText = "▶ Авто";
+        clearTimeout(autoTimer);
+      }
+    };
+const params = new URLSearchParams(window.location.search);
+const selectedLevel = params.get("level") || "beg";
+
+Promise.all([
+  fetch("terms.json").then(res => res.json()),
+  fetch("audio_map.json").then(res => res.json())
+]).then(([termsData, audioMapData]) => {
+  terms = termsData.filter(t => t[2] === selectedLevel);
+  allTerms = [...terms];
+  audioMap = audioMapData;
+  showNextWord();
+});
+
+  document.getElementById("homeBtn").onclick = () => {
+  window.location.href = "index.html";
+};
+
+  </script>
+
+</body>
+</html>
