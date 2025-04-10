@@ -132,52 +132,7 @@
 }
 
 
-    current = terms[Math.floor(Math.random() * terms.length)];
-    const wordEl = document.getElementById("word");
-    wordEl.innerText = current[0];
-    wordEl.setAttribute("dir", "rtl");
-    wordEl.classList.toggle("handwritten", isHandwritten);
-    playAudio(current[0]);
-
-    let options = [current];
-    while (options.length < Math.min(5, terms.length)) {
-      let rand = terms[Math.floor(Math.random() * terms.length)];
-      if (!options.includes(rand)) options.push(rand);
-    }
-    options.sort(() => Math.random() - 0.5);
-
-    const optDiv = document.getElementById("options");
-    optDiv.innerHTML = "";
-    document.getElementById("feedback").innerText = "";
-
-    options.forEach(opt => {
-      const btn = document.createElement("button");
-      btn.className = "option rus";
-      btn.innerText = opt[1];
-      btn.setAttribute("dir", "ltr");
-      btn.onclick = () => {
-        if (opt === current) {
-          document.getElementById("feedback").innerText = "✔ Верно";
-          updateProgress();
-          setTimeout(showWord, 1000);
-        } else {
-          document.getElementById("feedback").innerText = "❌ Неверно. Нажмите верный ответ";
-          playAudio(current[0]);
-          wrongAnswers.push(current);
-          document.querySelectorAll(".option").forEach(b => {
-            b.disabled = true;
-            if (b.innerText === current[1]) {
-              b.disabled = false;
-              b.classList.add("correct");
-              b.onclick = () => setTimeout(showWord, 500);
-            }
-          });
-        }
-      };
-      optDiv.appendChild(btn);
-    });
-  }
-
+   
   function skipWord() {
     terms = terms.filter(t => t !== current);
     updateProgress();
