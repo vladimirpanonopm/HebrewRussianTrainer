@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Тренажёр иврито-русских терминов с озучкой</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+  @font-face {
+    font-family: "GveretLevin";
+    src: url("GveretLevinAlefAlefAlef-Regular.ttf") format("truetype");
+  }
+
+  .handwritten {
+    font-family: "GveretLevin", cursive !important;
+  }
+</style>
+
+</head>
+<body class="trainer">
+  <h1>🧠 Тренажёр самообслуживания в гастрономе</h1>
+  <div id="word">&#1494;&#1493;&#1502;&#1508;&#1512;...</div>
+  <div id="options"></div>
+  <div id="feedback"></div>
+  <div id="controls">
+    <button id="repeat" class="control-button">🔁 Повторить</button>
+    <button id="skip" class="control-button">🗑 Не повторять это слово</button>
+    <button id="restart" class="control-button" style="display:none">🔄 Начать заново</button>
+    <button id="retryErrors" class="control-button" style="display:none">🔁 Повторить ошибки</button>
+    <button id="toggleFont" class="control-button">✏️ Рукописный шрифт</button>
+  </div>
+  <div id="progress">Выучено: 0 из 0 | Ошибок: 0</div>
+  <div id="home-link">
+    <a href="index.html" class="control-button">🏠 На главную</a>
+  </div>
+<script>
+  let allTerms = [];
+  let terms = [];
+  let fullTerms = [];
+  let audioMap = {};
+  let current = null;
+  let wrongAnswers = [];
+  let isHandwritten = false;
+
+  const level = new URLSearchParams(window.location.search).get("level") || "beg";
+
+  function playAudio(hebrew) {
+    const filename = audioMap[hebrew];
+    if (filename) {
+      new Audio("audio/" + encodeURIComponent(filename)).play();
+    }
+  }
+
+  function updateProgress() {
+    document.getElementById("progress").innerText =
+      `Выучено: ${allTerms.length - terms.length} из ${allTerms.length} | Ошибок: ${wrongAnswers.length}`;
+  }
+
+  function showWord() {
+    updateProgress();
+    if (terms.length === 0) {
+      document.getElementById("word").innerText = "🎉 Все слова изучены!";
+      document.getElementById("options").innerHTML = "";
+      document.getElementById("feedback").innerText = "";
+      document.getElementById("repeat").style.display = "none";
+      document.getElementById("skip").style.display = "none";
+      document.getElementById("restart").style.display = "inline-block";
+      if (wrongAnswers.length > 0) {
+        document.getElementById("retryErrors").style.display = "inline-block";
+      }
+      return;
+    }
+
+    current = terms[Math.floor(Math.random() * terms.length)];
+    const wordEl = document.getElementById("word");
+    wordEl.innerText = current[0];
+    wordEl.setAttribute("dir", "rtl");
+    wordEl.classList.toggle("handwritten", isHandwritten);
+    playAudio(current[0]);
+
+    let options = [current];
+    while (options.length < Math.min(5, terms.length)) {
+      let rand = terms[Math.floor(Math.random() * terms.length)];
+      if (!options.includes(rand)) options.push(rand);
+    }
+    options.sort(() => Math.random() - 0.5);
+
+    const optDiv = document.getElementById("options");
+    optDiv.innerHTML = "";
+    document.getElementById("feedback").innerText = "";
+
+    options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option rus";
+      btn.innerText = opt[1];
+      btn.setAttribute("dir", "ltr");
+      btn.onclick = () => {
+        if (opt === current) {
+          document.getElementById("feedback").innerText = "✔ Верно";
+          updateProgress();
+          setTimeout(showWord, 1000);
+        } else {
+          document.getElementById("feedback").innerText = "❌ Неверно. Нажмите верный ответ";
+          playAudio(current[0]);
+          wrongAnswers.push(current);
+          document.querySelectorAll(".option").forEach(b => {
+            b.disabled = true;
+            if (b.innerText === current[1]) {
+              b.disabled = false;
+              b.classList.add("correct");
+              b.onclick = () => setTimeout(showWord, 500);
+            }
+          });
+        }
+      };
+      optDiv.appendChild(btn);
+    });
+  }
+
+  function skipWord() {
+    terms = terms.filter(t => t !== current);
+    updateProgress();
+    showWord();
+  }
+
+  document.getElementById("repeat").onclick = () => {
+    if (current) playAudio(current[0]);
+  };
+  document.getElementById("skip").onclick = skipWord;
+  document.getElementById("restart").onclick = () => {
+    terms = [...fullTerms];
+    allTerms = [...fullTerms];
+    wrongAnswers = [];
+    updateProgress();
+    document.getElementById("restart").style.display = "none";
+    document.getElementById("retryErrors").style.display = "none";
+    document.getElementById("repeat").style.display = "inline-block";
+    document.getElementById("skip").style.display = "inline-block";
+    showWord();
+  };
+  document.getElementById("retryErrors").onclick = () => {
+    terms = [...wrongAnswers];
+    allTerms = [...wrongAnswers];
+    wrongAnswers = [];
+    updateProgress();
+    document.getElementById("retryErrors").style.display = "none";
+    document.getElementById("restart").style.display = "none";
+    document.getElementById("repeat").style.display = "inline-block";
+    document.getElementById("skip").style.display = "inline-block";
+    showWord();
+  };
+
+  document.getElementById("toggleFont").onclick = () => {
+    isHandwritten = !isHandwritten;
+    document.getElementById("word").classList.toggle("handwritten", isHandwritten);
+  };
+
+ Promise.all([
+  fetch("terms.json").then(res => res.json()),
+  fetch("audio_map.json").then(res => res.json())
+]).then(([termsData, audioMapData]) => {
+  const filtered = termsData.filter(t => t[2] === level);
+  terms = [...filtered];
+  allTerms = [...filtered];
+  fullTerms = [...filtered];
+  audioMap = audioMapData;
+
+  // НЕ вызываем showWord() сразу!
+  setTimeout(() => showWord(), 0); // безопасный вызов в следующем цикле событий
+});
+
+</script>
+</body>
+</html>
