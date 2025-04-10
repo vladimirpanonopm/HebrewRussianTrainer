@@ -78,16 +78,16 @@
   wordEl.classList.toggle("handwritten", isHandwritten);
   playAudio(current[0]);
 
+  const optDiv = document.getElementById("options");
+  optDiv.innerHTML = "";
+  document.getElementById("feedback").innerText = "";
+
   let options = [current];
   while (options.length < Math.min(5, terms.length)) {
     let rand = terms[Math.floor(Math.random() * terms.length)];
     if (!options.includes(rand)) options.push(rand);
   }
   options.sort(() => Math.random() - 0.5);
-
-  const optDiv = document.getElementById("options");
-  optDiv.innerHTML = "";
-  document.getElementById("feedback").innerText = "";
 
   options.forEach(opt => {
     const btn = document.createElement("button");
@@ -96,7 +96,7 @@
     btn.setAttribute("dir", "ltr");
 
     btn.onclick = () => {
-      btn.blur(); // снимаем фокус при нажатии (особенно важно для iOS)
+      btn.blur(); // снимаем фокус
 
       if (opt === current) {
         document.getElementById("feedback").innerText = "✔ Верно";
@@ -114,7 +114,7 @@
             b.disabled = false;
             b.classList.add("correct");
             b.onclick = () => {
-              b.blur(); // тоже снимем фокус
+              b.blur();
               setTimeout(showWord, 500);
             };
           }
@@ -124,6 +124,11 @@
 
     optDiv.appendChild(btn);
   });
+
+  setTimeout(() => {
+    document.activeElement.blur();
+  }, 100);
+}
 
   // про запас: если что-то осталось в фокусе — убираем
   setTimeout(() => {
