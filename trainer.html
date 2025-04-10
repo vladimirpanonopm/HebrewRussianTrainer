@@ -5,16 +5,15 @@
   <title>Тренажёр иврито-русских терминов с озучкой</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-  @font-face {
-    font-family: "GveretLevin";
-    src: url("GveretLevinAlefAlefAlef-Regular.ttf") format("truetype");
-  }
+    @font-face {
+      font-family: "GveretLevin";
+      src: url("GveretLevinAlefAlefAlef-Regular.ttf") format("truetype");
+    }
 
-  .handwritten {
-    font-family: "GveretLevin", cursive !important;
-  }
-</style>
-
+    .handwritten {
+      font-family: "GveretLevin", cursive !important;
+    }
+  </style>
 </head>
 <body class="trainer">
   <h1>🧠 Тренажёр самообслуживания в гастрономе</h1>
@@ -32,6 +31,7 @@
   <div id="home-link">
     <a href="index.html" class="control-button">🏠 На главную</a>
   </div>
+
 <script>
   let allTerms = [];
   let terms = [];
@@ -56,88 +56,80 @@
   }
 
   function showWord() {
-  updateProgress();
+    updateProgress();
 
-  if (terms.length === 0) {
-    document.getElementById("word").innerText = "🎉 Все слова изучены!";
-    document.getElementById("options").innerHTML = "";
-    document.getElementById("feedback").innerText = "";
-    document.getElementById("repeat").style.display = "none";
-    document.getElementById("skip").style.display = "none";
-    document.getElementById("restart").style.display = "inline-block";
-    if (wrongAnswers.length > 0) {
-      document.getElementById("retryErrors").style.display = "inline-block";
-    }
-    return;
-  }
-
-  current = terms[Math.floor(Math.random() * terms.length)];
-  const wordEl = document.getElementById("word");
-  wordEl.innerText = current[0];
-  wordEl.setAttribute("dir", "rtl");
-  wordEl.classList.toggle("handwritten", isHandwritten);
-  playAudio(current[0]);
-
-  const optDiv = document.getElementById("options");
-  optDiv.innerHTML = "";
-  document.getElementById("feedback").innerText = "";
-
-  let options = [current];
-  while (options.length < Math.min(5, terms.length)) {
-    let rand = terms[Math.floor(Math.random() * terms.length)];
-    if (!options.includes(rand)) options.push(rand);
-  }
-  options.sort(() => Math.random() - 0.5);
-
-  options.forEach(opt => {
-    const btn = document.createElement("button");
-    btn.className = "option rus";
-    btn.innerText = opt[1];
-    btn.setAttribute("dir", "ltr");
-
-    btn.onclick = () => {
-      btn.blur(); // снимаем фокус
-
-      if (opt === current) {
-        document.getElementById("feedback").innerText = "✔ Верно";
-        updateProgress();
-        setTimeout(showWord, 1000);
-      } else {
-        document.getElementById("feedback").innerText = "❌ Неверно. Нажмите верный ответ";
-        playAudio(current[0]);
-        wrongAnswers.push(current);
-        updateProgress();
-
-        document.querySelectorAll(".option").forEach(b => {
-          b.disabled = true;
-          if (b.innerText === current[1]) {
-            b.disabled = false;
-            b.classList.add("correct");
-            b.onclick = () => {
-              b.blur();
-              setTimeout(showWord, 500);
-            };
-          }
-        });
+    if (terms.length === 0) {
+      document.getElementById("word").innerText = "🎉 Все слова изучены!";
+      document.getElementById("options").innerHTML = "";
+      document.getElementById("feedback").innerText = "";
+      document.getElementById("repeat").style.display = "none";
+      document.getElementById("skip").style.display = "none";
+      document.getElementById("restart").style.display = "inline-block";
+      if (wrongAnswers.length > 0) {
+        document.getElementById("retryErrors").style.display = "inline-block";
       }
-    };
+      return;
+    }
 
-    optDiv.appendChild(btn);
-  });
+    current = terms[Math.floor(Math.random() * terms.length)];
+    const wordEl = document.getElementById("word");
+    wordEl.innerText = current[0];
+    wordEl.setAttribute("dir", "rtl");
+    wordEl.classList.toggle("handwritten", isHandwritten);
+    playAudio(current[0]);
 
-  setTimeout(() => {
-    document.activeElement.blur();
-  }, 100);
-}
+    const optDiv = document.getElementById("options");
+    optDiv.innerHTML = "";
+    document.getElementById("feedback").innerText = "";
 
-  // про запас: если что-то осталось в фокусе — убираем
-  setTimeout(() => {
-    document.activeElement.blur();
-  }, 100);
-}
+    let options = [current];
+    while (options.length < Math.min(5, terms.length)) {
+      let rand = terms[Math.floor(Math.random() * terms.length)];
+      if (!options.includes(rand)) options.push(rand);
+    }
+    options.sort(() => Math.random() - 0.5);
 
+    options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option rus";
+      btn.innerText = opt[1];
+      btn.setAttribute("dir", "ltr");
 
-   
+      btn.onclick = () => {
+        btn.blur(); // снимаем фокус
+
+        if (opt === current) {
+          document.getElementById("feedback").innerText = "✔ Верно";
+          updateProgress();
+          setTimeout(showWord, 1000);
+        } else {
+          document.getElementById("feedback").innerText = "❌ Неверно. Нажмите верный ответ";
+          playAudio(current[0]);
+          wrongAnswers.push(current);
+          updateProgress();
+
+          document.querySelectorAll(".option").forEach(b => {
+            b.disabled = true;
+            if (b.innerText === current[1]) {
+              b.disabled = false;
+              b.classList.add("correct");
+              b.onclick = () => {
+                b.blur();
+                setTimeout(showWord, 500);
+              };
+            }
+          });
+        }
+      };
+
+      optDiv.appendChild(btn);
+    });
+
+    setTimeout(() => {
+      document.activeElement.blur();
+    }, 100);
+  }
+
   function skipWord() {
     terms = terms.filter(t => t !== current);
     updateProgress();
@@ -176,20 +168,18 @@
     document.getElementById("word").classList.toggle("handwritten", isHandwritten);
   };
 
- Promise.all([
-  fetch("terms.json").then(res => res.json()),
-  fetch("audio_map.json").then(res => res.json())
-]).then(([termsData, audioMapData]) => {
-  const filtered = termsData.filter(t => t[2] === level);
-  terms = [...filtered];
-  allTerms = [...filtered];
-  fullTerms = [...filtered];
-  audioMap = audioMapData;
+  Promise.all([
+    fetch("terms.json").then(res => res.json()),
+    fetch("audio_map.json").then(res => res.json())
+  ]).then(([termsData, audioMapData]) => {
+    const filtered = termsData.filter(t => t[2] === level);
+    terms = [...filtered];
+    allTerms = [...filtered];
+    fullTerms = [...filtered];
+    audioMap = audioMapData;
 
-  // НЕ вызываем showWord() сразу!
-  setTimeout(() => showWord(), 0); // безопасный вызов в следующем цикле событий
-});
-
+    setTimeout(() => showWord(), 0); // безопасный вызов
+  });
 </script>
 </body>
 </html>
