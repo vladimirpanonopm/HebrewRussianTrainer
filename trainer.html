@@ -56,19 +56,81 @@
   }
 
   function showWord() {
-    updateProgress();
-    if (terms.length === 0) {
-      document.getElementById("word").innerText = "🎉 Все слова изучены!";
-      document.getElementById("options").innerHTML = "";
-      document.getElementById("feedback").innerText = "";
-      document.getElementById("repeat").style.display = "none";
-      document.getElementById("skip").style.display = "none";
-      document.getElementById("restart").style.display = "inline-block";
-      if (wrongAnswers.length > 0) {
-        document.getElementById("retryErrors").style.display = "inline-block";
-      }
-      return;
+  updateProgress();
+
+  if (terms.length === 0) {
+    document.getElementById("word").innerText = "🎉 Все слова изучены!";
+    document.getElementById("options").innerHTML = "";
+    document.getElementById("feedback").innerText = "";
+    document.getElementById("repeat").style.display = "none";
+    document.getElementById("skip").style.display = "none";
+    document.getElementById("restart").style.display = "inline-block";
+    if (wrongAnswers.length > 0) {
+      document.getElementById("retryErrors").style.display = "inline-block";
     }
+    return;
+  }
+
+  current = terms[Math.floor(Math.random() * terms.length)];
+  const wordEl = document.getElementById("word");
+  wordEl.innerText = current[0];
+  wordEl.setAttribute("dir", "rtl");
+  wordEl.classList.toggle("handwritten", isHandwritten);
+  playAudio(current[0]);
+
+  let options = [current];
+  while (options.length < Math.min(5, terms.length)) {
+    let rand = terms[Math.floor(Math.random() * terms.length)];
+    if (!options.includes(rand)) options.push(rand);
+  }
+  options.sort(() => Math.random() - 0.5);
+
+  const optDiv = document.getElementById("options");
+  optDiv.innerHTML = "";
+  document.getElementById("feedback").innerText = "";
+
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "option rus";
+    btn.innerText = opt[1];
+    btn.setAttribute("dir", "ltr");
+
+    btn.onclick = () => {
+      btn.blur(); // снимаем фокус при нажатии (особенно важно для iOS)
+
+      if (opt === current) {
+        document.getElementById("feedback").innerText = "✔ Верно";
+        updateProgress();
+        setTimeout(showWord, 1000);
+      } else {
+        document.getElementById("feedback").innerText = "❌ Неверно. Нажмите верный ответ";
+        playAudio(current[0]);
+        wrongAnswers.push(current);
+        updateProgress();
+
+        document.querySelectorAll(".option").forEach(b => {
+          b.disabled = true;
+          if (b.innerText === current[1]) {
+            b.disabled = false;
+            b.classList.add("correct");
+            b.onclick = () => {
+              b.blur(); // тоже снимем фокус
+              setTimeout(showWord, 500);
+            };
+          }
+        });
+      }
+    };
+
+    optDiv.appendChild(btn);
+  });
+
+  // про запас: если что-то осталось в фокусе — убираем
+  setTimeout(() => {
+    document.activeElement.blur();
+  }, 100);
+}
+
 
     current = terms[Math.floor(Math.random() * terms.length)];
     const wordEl = document.getElementById("word");
