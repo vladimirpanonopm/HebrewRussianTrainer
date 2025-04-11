@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="he">
+<head>
+<meta charset="utf-8"/>
+<title>Тренажёр</title>
+<link href="style.css" rel="stylesheet"/>
+<style>
+  @font-face {
+    font-family: "GveretLevin";
+    src: url("GveretLevinAlefAlefAlef-Regular.ttf") format("truetype");
+  }
+
+  .handwritten {
+    font-family: "GveretLevin", cursive !important;
+  }
+</style>
+</head>
+<body class="trainer">
+<h1>🧠 Проверяй себя</h1>
+<div id="word">זומפר...</div>
+<div id="options"></div>
+<div id="feedback"></div>
+<div id="controls"><button class="control-button" id="autoToggle">▶️ Авто</button>
+<button class="control-button" id="repeat">🔁 Повторить</button>
+<button class="control-button" id="skip">🗑 Не повторять это слово</button>
+<button class="control-button" id="restart" style="display:none">🔄 Начать заново</button>
+<button class="control-button" id="retryErrors" style="display:none">🔁 Повторить ошибки</button>
+<button class="control-button" id="toggleFont">✏️ Рукописный шрифт</button>
+</div>
+<div id="progress">Выучено: 0 из 0 | Ошибок: 0</div>
+<div id="home-link">
+<a class="control-button" href="index.html">🏠 На главную</a>
+</div>
+
+<script>
+let terms = [];
+let current = null;
+let audioMap = {};
+let learned = 0;
+let audio = new Audio();
+let autoMode = false;
+
+function playAudio(hebrew) {
+  const filename = audioMap[hebrew];
+  if (filename) {
+    audio.src = "audio/" + encodeURIComponent(filename);
+    audio.play().catch(e => {
+      console.warn("Ошибка воспроизведения:", e);
+    });
+  }
+}
+
+function showWord() {
+  if (terms.length === 0) {
+    document.getElementById("hebrewWord").innerText = "🎉 Все слова изучены!";
+    document.getElementById("translation").innerText = "";
+    return;
+  }
+  current = terms[Math.floor(Math.random() * terms.length)];
+  document.getElementById("hebrewWord").innerText = current[0];
+  document.getElementById("translation").innerText = current[1];
+  playAudio(current[0]);
+}
+
+function skipWord() {
+  terms = terms.filter(t => t !== current);
+  learned++;
+  showWord();
+  updateProgress();
+}
+
+function repeatWord() {
+  if (current) playAudio(current[0]);
+}
+
+function updateProgress() {
+  document.getElementById("progress").innerText = "Выучено: " + learned + " / " + (learned + terms.length);
+}
+
+function startAutoMode() {
+  autoMode = true;
+  nextAuto();
+}
+
+function stopAutoMode() {
+  autoMode = false;
+}
+
+function nextAuto() {
+  if (!autoMode || terms.length === 0) return;
+  showWord();
+  setTimeout(nextAuto, 1800);
+}
+
+document.getElementById("repeat").onclick = repeatWord;
+document.getElementById("skip").onclick = skipWord;
+document.getElementById("autoToggle").onclick = () => {
+  autoMode = !autoMode;
+  if (autoMode) {
+    startAutoMode();
+    document.getElementById("autoToggle").innerText = "⏹ Стоп";
+  } else {
+    stopAutoMode();
+    document.getElementById("autoToggle").innerText = "▶️ Авто";
+  }
+};
+
+fetch("terms.json")
+  .then(res => res.json())
+  .then(data => {
+    terms = data;
+    updateProgress();
+    showWord();
+  });
+
+fetch("audio_map.json")
+  .then(res => res.json())
+  .then(map => {
+    audioMap = map;
+  });
+</script></body>
+</html>
