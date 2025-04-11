@@ -22,13 +22,7 @@ h1 {
   color: black;
 }
 
-#hebrewWord {
-  font-size: 3em;
-  font-weight: bold;
-  font-family: "Arial", "Noto Sans Hebrew", sans-serif;
-  margin: 60px 0 20px;
-  color: black;
-}
+
 
 #translation {
   font-size: 2em;
@@ -162,10 +156,7 @@ h1 {
 #word:not(.handwritten) {
   font-family: 'FrankRuhlLibre', serif;
 }
-#hebrewWord {
-  font-family: 'FrankRuhlLibre', serif;
-  font-size: 5em !important;
-}
+
 
 
 
@@ -195,9 +186,9 @@ h1 {
 
 
 #hebrewWord {
-  font-size: 3em;
-  font-weight: bold;
-  font-family: 'Frank Ruhl Libre', 'Arial', 'Noto Sans Hebrew', sans-serif;
+  font-size: 5em !important;
+  font-weight: normal;
+  font-family: 'FrankRuhlLibreVariable', 'FrankRuhlLibreStatic', 'Arial', 'Noto Sans Hebrew', sans-serif;
   margin: 60px 0 20px;
   color: black;
 }
