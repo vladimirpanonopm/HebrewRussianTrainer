@@ -1,25 +1,83 @@
+
 body {
   font-family: sans-serif;
   text-align: center;
   padding: 40px;
-  background-color: #f0f5fa;
+  background-image: url("texture.jpg");
+  background-size: cover;
+  background-repeat: repeat;
+  background-position: center;
 }
 
-/* Слово на иврите */
-#word {
-  font-family: 'Rubik', sans-serif;
-  font-size: 5em;
+h1 {
+  color: #7b5d35;
+  font-size: 1.4em;
+  margin-bottom: 30px;
+}
+#word[dir="rtl"]:not(.handwritten)  {
+  font-size: 2.4em;
+    font-weight: bold;
+  font-family: "Arial", "Noto Sans Hebrew", sans-serif;
+  margin: 60px 0 20px;
+  color: black;
+}
+
+#hebrewWord {
+  font-size: 3em;
   font-weight: bold;
-  direction: rtl;
-  unicode-bidi: isolate;
-  margin-bottom: 20px;
+  font-family: "Arial", "Noto Sans Hebrew", sans-serif;
+  margin: 60px 0 20px;
+  color: black;
 }
 
-/* Фиксированная ширина для кнопок */
+#translation {
+  font-size: 2em;
+  font-family: sans-serif;
+  color: #7b5d35;
+  margin-bottom: 60px;
+}
+
+#controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.control-button {
+  width: 240px;
+  height: 60px;
+  font-size: 1.5em;
+  font-family: sans-serif;
+  color: #7b5d35;
+  border: 2px solid #f1e4c1;
+  border-radius: 12px;
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-button:hover {
+  background-color: #eee6d9;
+}
+
+
+.control-button:hover {
+  background-color: #eee6d9;
+}
+#controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 30px;
+}
+
 .option {
-  display: inline-block;         /* <-- ключевой момент */
-  width: 350px;                  /* <-- фиксированная ширина */
-  height: auto;
+  width: 360px;
   min-height: 60px;
   padding: 14px 20px;
   font-size: 1.5em;
@@ -35,22 +93,103 @@ body {
   word-wrap: break-word;
   text-align: center;
   box-sizing: border-box;
-  background-color: lightgreen;
+  display: block;
 }
 
 
-/* Кнопка "Не повторять" */
-#skip {
-  margin-top: 20px;
+
+.option.rus:hover {
+  background-color: #eee6d9;
+}
+
+#progress {
   font-size: 0.9em;
-  background-color: #ffe0e0;
+  font-family: sans-serif;
+  margin-top: 30px;
+  color: #7b5d35;
 }
-
-/* Обратная связь */
-#feedback {
-  margin-top: 15px;
+.option.correct {
+  border: 2px solid #7eb6a9 !important; /* мягкий зелёный в твоей цветовой гамме */
+}
+#feedback.warning {
+  color: #a45757; /* тёплый гранат, идеально сочетается с #7b5d35 */
   font-weight: bold;
 }
+#feedback.success {
+  color: #4f7b44; /* мягкий зелёный, сдержанный */
+  font-weight: bold;
+}
+/* Стиль для текста "Неверно" */
+.warning {
+  color: #c97b6b;
+}
 
-/* Импорт Rubik только для #word */
-@import url('https://fonts.googleapis.com/css2?family=Rubik&display=swap');
+/* Стиль для текста "Верно" */
+.success {
+  color: green;
+}
+#feedback {
+  height: 2.1em; /* фиксированная высота, можно увеличить до 2.2em */
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7b5d35;
+  transition: color 0.2s ease;
+  text-align: center;
+}
+#toggle-container {
+  margin-top: 20px;
+}
+@font-face {
+  font-family: 'FrankRuhlLibre';
+  src: url('fonts/FrankRuhlLibre-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+#word:not(.handwritten) {
+  font-family: 'FrankRuhlLibre', serif;
+}
+#hebrewWord {
+  font-family: 'FrankRuhlLibre', serif;
+  font-size: 5em !important;
+}
+
+
+
+@font-face {
+  font-family: 'GveretLevin';
+  src: url('fonts/GveretLevin.ttf') format('truetype');
+}
+#word.handwritten {
+  font-family: 'GveretLevin', cursive;
+  font-size: 4.4em;
+}
+
+.handwritten {
+  font-family: 'GveretLevin', cursive;
+  font-size: 6.4em;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre&display=swap');
+
+#word[dir="rtl"]:not(.handwritten) {
+  font-size: 2.4em;
+  font-weight: bold;
+  font-family: 'Frank Ruhl Libre', 'Arial', 'Noto Sans Hebrew', sans-serif;
+  margin: 60px 0 20px;
+  color: black;
+}
+
+#hebrewWord {
+  font-size: 3em;
+  font-weight: bold;
+  font-family: 'Frank Ruhl Libre', 'Arial', 'Noto Sans Hebrew', sans-serif;
+  margin: 60px 0 20px;
+  color: black;
+}
+
+
+
+
+
