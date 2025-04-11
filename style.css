@@ -141,13 +141,23 @@ h1 {
 #toggle-container {
   margin-top: 20px;
 }
+/* Обычный TTF — для Safari */
 @font-face {
- font-family: 'FrankRuhlLibre';
-  src: url('fonts/FrankRuhlLibre-Regular.ttf') format('truetype'),
-       url('fonts/FrankRuhlLibre-VariableFont_wght.ttf') format('truetype');
+  font-family: 'FrankRuhlLibreStatic';
+  src: url('fonts/FrankRuhlLibre-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Variable Font — для Chrome и Firefox */
+@font-face {
+  font-family: 'FrankRuhlLibreVariable';
+  src: url('fonts/FrankRuhlLibre-VariableFont_wght.ttf') format('truetype');
   font-weight: 100 900;
   font-style: normal;
 }
+
+
 
 #word:not(.handwritten) {
   font-family: 'FrankRuhlLibre', serif;
@@ -178,10 +188,11 @@ h1 {
 #word[dir="rtl"]:not(.handwritten) {
   font-size: 2.4em;
   font-weight: bold;
-  font-family: 'Frank Ruhl Libre', 'Arial', 'Noto Sans Hebrew', sans-serif;
+  font-family: 'FrankRuhlLibreVariable', 'FrankRuhlLibreStatic', 'Arial', 'Noto Sans Hebrew', sans-serif;
   margin: 60px 0 20px;
   color: black;
 }
+
 
 #hebrewWord {
   font-size: 3em;
