@@ -1,125 +1,153 @@
 <!DOCTYPE html>
-
 <html dir="rtl" lang="he">
 <head>
-<meta charset="utf-8"/>
-<title>Тренажёр</title>
-<link href="style.css" rel="stylesheet"/>
-<style>
-  @font-face {
-    font-family: "GveretLevin";
-    src: url("GveretLevinAlefAlefAlef-Regular.ttf") format("truetype");
-  }
-
-  .handwritten {
-    font-family: "GveretLevin", cursive !important;
-  }
-</style>
+  <meta charset="utf-8" />
+  <title>Тренажёр</title>
+  <link href="style.css" rel="stylesheet" />
 </head>
 <body class="trainer">
-<h1>🧠 Проверяй себя</h1>
-<div id="hebrewWord"></div>
-<div id="translation"></div>
+  <h1>🧠 Тренажёр самообслуживания в гастрономе</h1>
+  <div id="word" dir="rtl">Загрузка...</div>
+  <div id="options"></div>
+  <div id="feedback"></div>
 
-<div id="options"></div>
-<div id="feedback"></div>
-<div id="controls"><button class="control-button" id="autoToggle">▶️ Авто</button>
-<button class="control-button" id="repeat">🔁 Повторить</button>
-<button class="control-button" id="skip">🗑 Не повторять это слово</button>
-<button class="control-button" id="restart" style="display:none">🔄 Начать заново</button>
-<button class="control-button" id="retryErrors" style="display:none">🔁 Повторить ошибки</button>
-<button class="control-button" id="toggleFont">✏️ Рукописный шрифт</button>
-</div>
-<div id="progress">Выучено: 0 из 0 | Ошибок: 0</div>
-<div id="home-link">
-<a class="control-button" href="index.html">🏠 На главную</a>
-</div>
+  <div id="controls">
+    <button class="control-button" id="autoToggle">▶️ Авто</button>
+    <button class="control-button" id="repeat">🔁 Повторить</button>
+    <button class="control-button" id="skip">🗑 Не повторять это слово</button>
+    <button class="control-button" id="toggleFont">✏️ Рукописный шрифт</button>
+  </div>
 
-<script>
-let terms = [];
-let current = null;
-let audioMap = {};
-let learned = 0;
-let audio = new Audio();
-let autoMode = false;
+  <div id="progress">Выучено: 0 / 0 | Ошибок: 0</div>
 
-function playAudio(hebrew) {
-  const filename = audioMap[hebrew];
-  if (filename) {
-    audio.src = "audio/" + encodeURIComponent(filename);
-    audio.play().catch(e => {
-      console.warn("Ошибка воспроизведения:", e);
+  <div id="home-link">
+    <a class="control-button" href="index.html">🏠 На главную</a>
+  </div>
+
+  <script>
+    let terms = [];
+    let current = null;
+    let audioMap = {};
+    let learned = 0;
+    let mistakes = 0;
+    let audio = new Audio();
+    let autoMode = false;
+    let useHandwritten = false;
+
+    function playAudio(hebrew) {
+      const filename = audioMap[hebrew];
+      if (filename) {
+        audio.src = "audio/" + encodeURIComponent(filename);
+        audio.play().catch(e => {
+          console.warn("Ошибка воспроизведения:", e);
+        });
+      }
+    }
+
+    function updateProgress() {
+      document.getElementById("progress").innerText = `Выучено: ${learned} / ${learned + terms.length} | Ошибок: ${mistakes}`;
+    }
+
+    function showWord() {
+      if (terms.length === 0) {
+        document.getElementById("word").innerText = "🎉 Все слова изучены!";
+        document.getElementById("options").innerHTML = "";
+        return;
+      }
+
+      current = terms[Math.floor(Math.random() * terms.length)];
+      const [hebrew, translation] = current;
+
+      const wordDiv = document.getElementById("word");
+      wordDiv.innerText = hebrew;
+      wordDiv.className = useHandwritten ? "handwritten" : "";
+
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+
+      const shuffled = [...terms]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 4);
+      if (!shuffled.includes(current)) {
+        shuffled[Math.floor(Math.random() * 4)] = current;
+      }
+
+      shuffled.forEach(option => {
+        const btn = document.createElement("button");
+        btn.className = "option rus";
+        btn.innerText = option[1];
+        btn.onclick = () => {
+          if (option === current) {
+            terms = terms.filter(t => t !== current);
+            learned++;
+            feedback("✔ Верно!", "success");
+            setTimeout(showWord, 500);
+          } else {
+            mistakes++;
+            feedback("❌ Неверно...", "warning");
+          }
+          updateProgress();
+        };
+        optionsDiv.appendChild(btn);
+      });
+
+      playAudio(hebrew);
+    }
+
+    function feedback(text, cls) {
+      const el = document.getElementById("feedback");
+      el.innerText = text;
+      el.className = cls;
+    }
+
+    function skipWord() {
+      terms = terms.filter(t => t !== current);
+      learned++;
+      updateProgress();
+      showWord();
+    }
+
+    function repeatWord() {
+      if (current) playAudio(current[0]);
+    }
+
+    function startAuto() {
+      autoMode = true;
+      document.getElementById("autoToggle").innerText = "⏹ Стоп";
+      loopAuto();
+    }
+
+    function stopAuto() {
+      autoMode = false;
+      document.getElementById("autoToggle").innerText = "▶️ Авто";
+    }
+
+    function loopAuto() {
+      if (!autoMode || terms.length === 0) return;
+      showWord();
+      let delay = audio.duration ? (audio.duration * 1000 + 1800) : 3000;
+      setTimeout(loopAuto, delay);
+    }
+
+    document.getElementById("repeat").onclick = repeatWord;
+    document.getElementById("skip").onclick = skipWord;
+    document.getElementById("autoToggle").onclick = () => {
+      autoMode ? stopAuto() : startAuto();
+    };
+    document.getElementById("toggleFont").onclick = () => {
+      useHandwritten = !useHandwritten;
+      showWord();
+    };
+
+    Promise.all([
+      fetch("terms.json").then(r => r.json()),
+      fetch("audio_map.json").then(r => r.json())
+    ]).then(([data, map]) => {
+      terms = data;
+      audioMap = map;
+      updateProgress();
+      showWord();
     });
-  }
-}
-
-function showWord() {
-  if (terms.length === 0) {
-    document.getElementById("hebrewWord").innerText = "🎉 Все слова изучены!";
-    document.getElementById("translation").innerText = "";
-    return;
-  }
-  current = terms[Math.floor(Math.random() * terms.length)];
-  document.getElementById("hebrewWord").innerText = current[0];
-  document.getElementById("translation").innerText = current[1];
-  playAudio(current[0]);
-}
-
-function skipWord() {
-  terms = terms.filter(t => t !== current);
-  learned++;
-  showWord();
-  updateProgress();
-}
-
-function repeatWord() {
-  if (current) playAudio(current[0]);
-}
-
-function updateProgress() {
-  document.getElementById("progress").innerText = "Выучено: " + learned + " / " + (learned + terms.length);
-}
-
-function startAutoMode() {
-  autoMode = true;
-  nextAuto();
-}
-
-function stopAutoMode() {
-  autoMode = false;
-}
-
-function nextAuto() {
-  if (!autoMode || terms.length === 0) return;
-  showWord();
-  setTimeout(nextAuto, 1800);
-}
-
-document.getElementById("repeat").onclick = repeatWord;
-document.getElementById("skip").onclick = skipWord;
-document.getElementById("autoToggle").onclick = () => {
-  autoMode = !autoMode;
-  if (autoMode) {
-    startAutoMode();
-    document.getElementById("autoToggle").innerText = "⏹ Стоп";
-  } else {
-    stopAutoMode();
-    document.getElementById("autoToggle").innerText = "▶️ Авто";
-  }
-};
-
-fetch("terms.json")
-  .then(res => res.json())
-  .then(data => {
-    terms = data;
-    updateProgress();
-    showWord();
-  });
-
-fetch("audio_map.json")
-  .then(res => res.json())
-  .then(map => {
-    audioMap = map;
-  });
-</script></body>
+  </script>
+</body>
 </html>
