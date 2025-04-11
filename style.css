@@ -77,7 +77,10 @@ h1 {
 }
 
 .option.rus {
-  width: 240px;
+  width: auto;
+max-width: 90%;
+padding-left: 20px;
+padding-right: 20px;
   height: 60px;
   font-size: 1.5em;
   font-family: sans-serif;
